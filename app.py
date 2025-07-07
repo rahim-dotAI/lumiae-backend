@@ -11,6 +11,10 @@ PERSONALITIES = {
     "HAL": "I am HAL 9000. I'm here to help."
 }
 
+@app.route('/')
+def home():
+    return "🌟 LUMIÆ backend is live!"
+
 @app.route('/respond', methods=['POST'])
 def respond():
     data = request.get_json()
