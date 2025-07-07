@@ -3,10 +3,30 @@
 <head>
   <title>LUMIÆ Assistant</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    textarea { width: 100%; height: 100px; }
-    select, button { margin-top: 10px; }
-    .response { margin-top: 20px; background: #f0f0f0; padding: 10px; border-radius: 8px; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    select, button {
+      margin-top: 10px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .response {
+      margin-top: 20px;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -32,16 +52,26 @@
       const text = document.getElementById("userText").value;
       const mode = document.getElementById("mode").value;
 
-      const res = await fetch("https://https://lumiae-backend-production.up.railway.app/respond", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text, mode })
-      });
+      if (!text.trim()) {
+        document.getElementById("output").innerText = "Please type a message.";
+        return;
+      }
 
-      const data = await res.json();
-      document.getElementById("output").innerText = data.response;
+      try {
+        const res = await fetch("https://lumiae-backend-production.up.railway.app/respond", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text, mode })
+        });
+
+        const data = await res.json();
+        document.getElementById("output").innerText = data.response;
+      } catch (error) {
+        document.getElementById("output").innerText = "❌ Error connecting to the assistant. Please try again.";
+        console.error(error);
+      }
     }
   </script>
 </body>
