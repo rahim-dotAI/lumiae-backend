@@ -1,37 +1,38 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+import requests
 
-app = Flask(__name__)
-CORS(app)  # Allow cross-origin for frontend requests
-
-# Simple personality modes
-PERSONALITIES = {
-    "JARVIS": "I am JARVIS, your loyal assistant.",
-    "SAMANTHA": "Hi, I'm Samantha. How can I brighten your day?",
-    "HAL": "I am HAL 9000. I'm here to help."
-}
-
-@app.route('/')
-def home():
-    return "🌟 LUMIÆ backend is live!"
+DEEPSEEK_API_KEY = "sk-07d47b3a5f604ce1984f7734c9ab7ae7"
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 @app.route('/respond', methods=['POST'])
 def respond():
     data = request.get_json()
-    text = data.get('text', '').lower()
-    mode = data.get('mode', 'JARVIS').upper()
+    user_text = data.get('text', '')
 
-    # Basic AI logic (expandable)
-    if "hello" in text:
-        reply = f"{PERSONALITIES.get(mode, '')} Hello there!"
-    elif "how are you" in text:
-        reply = f"{PERSONALITIES.get(mode, '')} I'm doing well, thank you."
-    elif "goodbye" in text or "bye" in text:
-        reply = f"{PERSONALITIES.get(mode, '')} Goodbye! Talk to you later."
-    else:
-        reply = f"{PERSONALITIES.get(mode, '')} You said: {text}"
+    # Send to DeepSeek for smart AI reply
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "deepseek-chat",  # or "deepseek-coder" if you want it to write code
+        "messages": [
+            {"role": "system", "content": "You are LUMIÆ, a smart assistant who responds like a human friend."},
+            {"role": "user", "content": user_text}
+        ]
+    }
+
+    try:
+        res = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+        result = res.json()
+        reply = result["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        print("❌ DeepSeek error:", e)
+        reply = "Sorry, I'm having trouble thinking right now. 😞"
+
+    # Save to DB (optional if you want memory)
+    with sqlite3.connect(DB) as conn:
+        conn.execute("INSERT INTO chat (timestamp, user_text, bot_response) VALUES (?, ?, ?)",
+                     (time.time(), user_text, reply))
 
     return jsonify({"response": reply})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
