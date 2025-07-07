@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LUMIÆ Assistant</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    textarea { width: 100%; height: 100px; }
+    select, button { margin-top: 10px; }
+    .response { margin-top: 20px; background: #f0f0f0; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 Talk to LUMIÆ</h1>
+
+  <label>Choose Personality:</label><br>
+  <select id="mode">
+    <option value="JARVIS">JARVIS</option>
+    <option value="SAMANTHA">SAMANTHA</option>
+    <option value="HAL">HAL</option>
+  </select>
+
+  <br><br>
+  <label>Enter your message:</label><br>
+  <textarea id="userText" placeholder="Say something..."></textarea>
+  <br>
+  <button onclick="sendMessage()">Send</button>
+
+  <div class="response" id="output"></div>
+
+  <script>
+    async function sendMessage() {
+      const text = document.getElementById("userText").value;
+      const mode = document.getElementById("mode").value;
+
+      const res = await fetch("https://https://lumiae-backend-production.up.railway.app/respond", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text, mode })
+      });
+
+      const data = await res.json();
+      document.getElementById("output").innerText = data.response;
+    }
+  </script>
+</body>
+</html>
